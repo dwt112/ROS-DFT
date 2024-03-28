@@ -8,9 +8,9 @@
 
 ## Results
 
-![combined_image1](https://github.com/dwt112/RSO-DFT/raw/master/Figs/combined_image1.png)
+![combined_image1](https://github.com/dwt112/RSO-DFT/blob/main/Figs/combined_image1.png)
 
-![compare_block_CSratio](D:\小论文\paper1\compare_block_CSratio.png)
+![compare_block_CSratio](https://github.com/dwt112/RSO-DFT/blob/main/Figs/compare_block_CSratio.png)
 
 ## Datasets
 
