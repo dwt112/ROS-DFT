@@ -8,7 +8,7 @@
 
 ## Results
 
-![combined_image1](D:\小论文\paper1\combined_image1.png)
+![combined_image1](https://github.com/dwt112/RSO-DFT/raw/master/Figs/combined_image1.png)
 
 ![compare_block_CSratio](D:\小论文\paper1\compare_block_CSratio.png)
 
