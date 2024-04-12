@@ -1,5 +1,4 @@
 function [s, iterCount]=SL0(A, x, sigma_min, sigma_decrease_factor, mu_0, L, A_pinv, true_s)
-% 初始化迭代计数器
 iterCount = 0;
 %
 % SL0(A, x, sigma_min, sigma_decrease_factor, mu_0, L, A_pinv, true_s)
