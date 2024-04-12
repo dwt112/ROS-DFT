@@ -113,7 +113,7 @@ for cs_ratio = cs_ratios
         total_ssim = total_ssim + ssim_values(k);
 
         output_filename = sprintf('SL0_%s_PSNR_%0.2f_SSIM_%0.4f_cs_ratio_%d_NB_%d.tif', image_files(k).name, psnr_values(k), ssim_values(k), cs_ratio, NB);
-        imwrite(uint8(reconstructed_image_magnitude), fullfile('./result/gray/ReLogOthIRLS', output_filename));
+        imwrite(uint8(reconstructed_image_magnitude), fullfile('./result/gray/ReLogOthSL0', output_filename));
     end
 
     elapsed_time = toc; % Stop timer and return elapsed time
