@@ -16,13 +16,12 @@ for cs_ratio = cs_ratios
     total_psnr = 0;
     total_ssim = 0;
 
-    sparsity_level = sparsity_levels(sparsity_index);
-    tic; % Start timer
+    % Start timer
+    tic;
     % Iterate over all images
     for k = 1:length(image_files)
         image_name = fullfile(image_dir, image_files(k).name);
         I = imread(image_name);
-
         if size(I, 3) == 3
             I = rgb2gray(I);
         end
@@ -32,9 +31,9 @@ for cs_ratio = cs_ratios
         [height, width] = size(I);
         blocks = mat2cell(I, repmat(NB, 1, floor(height/NB)), repmat(NB, 1, floor(width/NB)));
         
-        % Load DFT measurement matrix
-        filename = fullfile(matrix_dir, sprintf('Phase_ReLogistic_Oth_Sparse_DFT_Measurement_Matrix_%d_%d.mat', cs_ratio, NB));
-        load(filename, 'Phi'); % Load measurement matrix
+        % Load ROS-DFT measurement matrix
+        filename = fullfile(matrix_dir, sprintf('Phase_ReLogistic_Oth_Sparse_DFT_Measurement_Matrix_%d_%d.mat', cs_ratio,NB));
+        load(filename, 'Phi');
         
         % Sparse transformation and compressed sampling
         for i = 1:size(blocks, 1)
@@ -47,21 +46,21 @@ for cs_ratio = cs_ratios
                 % Initialize the reconstructed block
                 S_hat_block = zeros(size(S));
 
-                % Apply Phi and OMP to recover each column of S
+                % Apply Phi and SL0 to recover each column of S
                 for col = 1:size(S, 2)
-                    Y = Phi * S(:, col); % Compressed sampling
+                    Y = Phi * S(:, col);
 
                     % Extract real and imaginary parts
                     Y_real = real(Y);
                     Y_imag = imag(Y);
 
                     % Quantization of real and imaginary parts
-                    R_min = min(Y_real(:));  % Minimum of real part
-                    R_max = max(Y_real(:));  % Maximum of real part
-                    I_min = min(Y_imag(:));  % Minimum of imaginary part
-                    I_max = max(Y_imag(:));  % Maximum of imaginary part
+                    R_min = min(Y_real(:));
+                    R_max = max(Y_real(:));
+                    I_min = min(Y_imag(:));
+                    I_max = max(Y_imag(:));
 
-                    % Actual quantization operation to get quantized data
+                    % Quantization operation
                     Y_real_quantized = round(255 * (Y_real - R_min) / (R_max - R_min));
                     Y_imag_quantized = round(255 * (Y_imag - I_min) / (I_max - I_min));
 
@@ -70,7 +69,7 @@ for cs_ratio = cs_ratios
                     bit_stream_imag = de2bi(Y_imag_quantized(:), 8, 'left-msb');
 
                     % Combine bit streams
-                    combined_bit_stream = [bit_stream_real; bit_stream_imag];% Extract bit streams of real and imaginary parts
+                    combined_bit_stream = [bit_stream_real; bit_stream_imag];
 
                     bit_stream_real = combined_bit_stream(1:end/2, :);
                     bit_stream_imag = combined_bit_stream(end/2+1:end, :);
@@ -79,29 +78,28 @@ for cs_ratio = cs_ratios
                     Y_real_quantized = bi2de(bit_stream_real, 'left-msb');
                     Y_imag_quantized = bi2de(bit_stream_imag, 'left-msb');
 
-                    % Dequantization operation to get original signal values
+                    % Dequantization operation
                     Y_real = (Y_real_quantized / 255 * (R_max - R_min)) + R_min;
                     Y_imag = (Y_imag_quantized / 255 * (I_max - I_min)) + I_min;
 
-                    % Combine real and imaginary parts to recover complex signal
+                    % Combine real and imaginary parts
                     Y = Y_real + 1i * Y_imag;
+                    
                     % Set SL0 algorithm parameters
                     sigma_min = 0.01;  % Minimum sigma value
                     % Image reconstruction (using SL0)
-                    [S_hat_col, iterCount] = SL0(Phi, Y, sigma_min);
+                    [S_hat_col,iterCount] = SL0(Phi, Y, sigma_min);
 
                     S_hat_block(:, col) = S_hat_col; % Place the recovered column back in the block
                 end
-
-                blocks{i, j} = idct2(S_hat_block); % Inverse DCT transform
-
+                % Inverse DCT transform
+                blocks{i, j} = idct2(S_hat_block);
             end
         end
 
-        % Reconstruct the image
         reconstructed_image = cell2mat(blocks);
 
-        image_names[k] = image_files(k).name;
+        image_names{k} = image_files(k).name;
 
         % Magnitude of reconstructed image
         reconstructed_image_magnitude = abs(reconstructed_image);
@@ -128,6 +126,6 @@ for cs_ratio = cs_ratios
 
     % Output results for all images
     for k = 1:length(image_files)
-        fprintf('Image: %s, PSNR/SSIM: %0.2f/%0.4f\n', image_names[k], psnr_values(k), ssim_values(k));
+        fprintf('Image: %s, PSNR/SSIM: %0.2f/%0.4f\n', image_names{k}, psnr_values(k), ssim_values(k));
     end
 end
