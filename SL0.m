@@ -130,7 +130,7 @@ while sigma>sigma_min
     
     sigma = sigma * sigma_decrease_factor;
     
-    %更新迭代次数
+    
     iterCount = iterCount + 1;
 end
     
